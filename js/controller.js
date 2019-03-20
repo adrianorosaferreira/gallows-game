@@ -1,13 +1,14 @@
-var criaController = function(jogo) {
+const criaController = jogo => {
 
     let $entrada = document.querySelector('#entrada');
     let $lacunas = document.querySelector('.lacunas');
 
-    var exibeLacunas = function() {
+    const exibeLacunas = () => {
 
         while ($lacunas.firstChild) {
             $lacunas.removeChild($lacunas.firstChild);
         }
+
         jogo.getLacunas().forEach((valor, indice) => {
             var item = document.createElement('li');
             item.classList.add('lacuna');
@@ -16,27 +17,49 @@ var criaController = function(jogo) {
         })
     };
 
-    var mudaPlaceHolder = function(texto) {
-        $entrada.placeholder = texto;
+    const mudaPlaceHolder = texto => $entrada.placeholder = texto;
+
+    const guardaPalavraSecreta = () => {
+        try {
+            jogo.setPalavraSecreta($entrada.value.trim());
+            $entrada.value = '';
+            mudaPlaceHolder('chute');
+            exibeLacunas();
+
+        } catch (error) {
+            alert(error.message)
+        }
+
     };
 
-    var guardaPalavraSecreta = function() {
-        jogo.setPalavraSecreta($entrada.value.trim());
-        $entrada.value = '';
-        mudaPlaceHolder('chute');
-        exibeLacunas();
-
-    };
-
-    var leChute = function() {
-        jogo.processaChute($entrada.value.trim().substr(0, 1));
+    const reiniciaTela = () => {
+        jogo.reinicia();
+        mudaPlaceHolder('Palavra secreta');
         $entrada.value = '';
         exibeLacunas();
     }
 
-    var inicia = function() {
+    const leChute = () => {
+        try {
+            jogo.processaChute($entrada.value.trim().substr(0, 1));
+            $entrada.value = '';
+            exibeLacunas();
 
-        $entrada.addEventListener('keypress', function(e) {
+            setInterval(() => {
+                if (jogo.ganhouOuPerdeu()) {
+                    alert(jogo.ganhou() ? 'Parabéns, você venceu :)' : 'Não fique triste, você vencerá da proxima vez ;)');
+                    reiniciaTela();
+                }
+            }, 500);
+
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    const inicia = () => {
+
+        $entrada.addEventListener('keypress', (e) => {
 
             if (e.charCode == 13) {
                 switch (jogo.getEtapa()) {
@@ -53,5 +76,5 @@ var criaController = function(jogo) {
         })
     };
 
-    return { inicia: inicia };
+    return { inicia };
 };
